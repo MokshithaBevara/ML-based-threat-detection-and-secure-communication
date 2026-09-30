@@ -1,37 +1,36 @@
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 import os
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 
-def generate_key():
+def generate_aes_key():
+    """Generate a 256-bit AES key."""
     return AESGCM.generate_key(bit_length=256)
 
 
-def encrypt_message(key, message):
+def encrypt_message(message, key):
+    """Encrypt a message using AES-256-GCM."""
     aes = AESGCM(key)
 
+    # 12-byte nonce recommended for GCM
     nonce = os.urandom(12)
 
-    encrypted = aes.encrypt(
+    ciphertext = aes.encrypt(
         nonce,
-        message.encode(),
+        message.encode("utf-8"),
         None
     )
 
-    ciphertext = encrypted[:-16]
-    tag = encrypted[-16:]
-
-    return nonce, ciphertext, tag
+    return nonce, ciphertext
 
 
-def decrypt_message(key, nonce, ciphertext, tag):
+def decrypt_message(nonce, ciphertext, key):
+    """Decrypt and authenticate an AES-256-GCM message."""
     aes = AESGCM(key)
-
-    encrypted = ciphertext + tag
 
     plaintext = aes.decrypt(
         nonce,
-        encrypted,
+        ciphertext,
         None
     )
 
-    return plaintext.decode()
+    return plaintext.decode("utf-8")

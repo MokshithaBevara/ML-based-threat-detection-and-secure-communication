@@ -1,49 +1,61 @@
-from crypto.aes import generate_key, encrypt_message, decrypt_message
+from crypto.aes import (
+    generate_aes_key,
+    encrypt_message,
+    decrypt_message
+)
+
 from crypto.rsa import (
-    generate_rsa_keys,
     encrypt_aes_key,
     decrypt_aes_key
 )
 
 
-def hybrid_encrypt(message, public_key):
-    # 1. Generate a new AES-256 key
-    aes_key = generate_key()
+def encrypt_data(message, public_key):
+    """
+    Hybrid encryption:
+    1. Generate AES-256 key
+    2. Encrypt message using AES-256-GCM
+    3. Encrypt AES key using RSA-2048-OAEP
+    """
 
-    # 2. Encrypt the message using AES-256-GCM
-    nonce, ciphertext, tag = encrypt_message(
-        aes_key,
-        message
-    )
+    # Generate AES key
+    aes_key = generate_aes_key()
 
-    # 3. Encrypt the AES key using RSA-OAEP
+    # Encrypt message
+    nonce, ciphertext = encrypt_message(message, aes_key)
+
+    # Protect AES key using RSA
     encrypted_aes_key = encrypt_aes_key(
-        public_key,
-        aes_key
+        aes_key,
+        public_key
     )
 
-    return encrypted_aes_key, nonce, ciphertext, tag
+    return encrypted_aes_key, nonce, ciphertext
 
 
-def hybrid_decrypt(
+def decrypt_data(
     encrypted_aes_key,
     nonce,
     ciphertext,
-    tag,
     private_key
 ):
-    # 1. Recover the AES key using RSA private key
+    """
+    Hybrid decryption:
+    1. Recover AES key using RSA
+    2. Decrypt message using AES-GCM
+    """
+
+    # Recover AES key
     aes_key = decrypt_aes_key(
-        private_key,
-        encrypted_aes_key
+        encrypted_aes_key,
+        private_key
     )
 
-    # 2. Decrypt and authenticate the message using AES-GCM
+    # Decrypt message
     message = decrypt_message(
-        aes_key,
         nonce,
         ciphertext,
-        tag
+        aes_key
     )
 
     return message
