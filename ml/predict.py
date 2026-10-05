@@ -3,10 +3,8 @@ import joblib
 import pandas as pd
 
 
-# Find project root
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Load trained model
 MODEL_PATH = os.path.join(
     BASE_DIR,
     "ml",
@@ -27,10 +25,6 @@ def detect_attack(
     browser_type,
     unusual_time_access
 ):
-    """
-    Predict whether a network/session activity
-    is normal or an attack.
-    """
 
     data = pd.DataFrame([{
         "network_packet_size": network_packet_size,
@@ -44,9 +38,44 @@ def detect_attack(
         "unusual_time_access": unusual_time_access
     }])
 
+    # Feature engineering
+    data["login_failure_ratio"] = (
+        data["failed_logins"] /
+        (data["login_attempts"] + 1)
+    )
+
+    data["auth_pressure"] = (
+        data["login_attempts"] +
+        data["failed_logins"]
+    )
+
+    data["login_failure_interaction"] = (
+        data["login_attempts"] *
+        data["failed_logins"]
+    )
+
+    data["risk_auth_interaction"] = (
+        data["ip_reputation_score"] *
+        data["failed_logins"]
+    )
+
+    data["session_login_interaction"] = (
+        data["session_duration"] *
+        data["login_attempts"]
+    )
+
+    # ML prediction
     prediction = model.predict(data)[0]
 
-    if prediction == 1:
+    # High-risk security safeguard
+    high_risk = (
+        login_attempts >= 10
+        and failed_logins >= 5
+        and ip_reputation_score >= 0.8
+        and unusual_time_access == 1
+    )
+
+    if prediction == 1 or high_risk:
         return "Attack"
-    else:
-        return "Normal"
+
+    return "Normal"

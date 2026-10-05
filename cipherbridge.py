@@ -6,22 +6,19 @@ from crypto.rsa import generate_rsa_keys
 from crypto.hybrid import encrypt_data, decrypt_data
 
 
-# Load ML evaluation
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-with open(os.path.join(BASE_DIR, "ml", "evaluation.json")) as f:
+with open(
+    os.path.join(BASE_DIR, "ml", "evaluation.json")
+) as f:
     evaluation = json.load(f)
 
 
 def main():
 
-    # ========================================================
-    # HEADER
-    # ========================================================
-
     print("\n" + "=" * 60)
     print("                  🔐 CIPHER GUARD")
-    print("                Secure Communication & Threat Detection")
+    print("          Secure Communication & Threat Detection")
     print("=" * 60)
 
     # ========================================================
@@ -31,10 +28,25 @@ def main():
     print("\n[1] ML SECURITY CHECK")
     print("-" * 60)
 
-    print(f"Model Accuracy : {evaluation['accuracy'] * 100:.2f}%")
-    print(f"Precision: {evaluation.get('precision', 0) * 100:.2f}%")
-    print(f"Recall   : {evaluation.get('recall', 0) * 100:.2f}%")
-    print(f"F1-score : {evaluation.get('f1', 0) * 100:.2f}%")
+    print(
+        f"Model Accuracy : "
+        f"{evaluation['accuracy'] * 100:.2f}%"
+    )
+
+    print(
+        f"Precision      : "
+        f"{evaluation['precision'] * 100:.2f}%"
+    )
+
+    print(
+        f"Recall         : "
+        f"{evaluation['recall'] * 100:.2f}%"
+    )
+
+    print(
+        f"F1-score       : "
+        f"{evaluation['f1_score'] * 100:.2f}%"
+    )
 
     print("\nConfusion Matrix:")
     print(evaluation["confusion_matrix"])
@@ -101,7 +113,7 @@ def main():
     print(f"\nML Prediction : {result}")
 
     # ========================================================
-    # BLOCK SUSPICIOUS SESSION
+    # 3. BLOCK SUSPICIOUS SESSION
     # ========================================================
 
     if result == "Attack":
@@ -115,14 +127,14 @@ def main():
         return
 
     # ========================================================
-    # ALLOW NORMAL SESSION
+    # 4. ALLOW NORMAL SESSION
     # ========================================================
 
-    print("✓ ACCESS GRANTED")
+    print("\n✓ ACCESS GRANTED")
     print("✓ Secure communication channel opened.")
 
     # ========================================================
-    # 3. KEY GENERATION
+    # 5. KEY GENERATION
     # ========================================================
 
     print("\n[3] KEY GENERATION")
@@ -133,7 +145,7 @@ def main():
     print("✓ RSA-2048 key pair generated")
 
     # ========================================================
-    # 4. SECURE MESSAGE
+    # 6. SECURE MESSAGE
     # ========================================================
 
     print("\n[4] SECURE MESSAGE")
@@ -147,11 +159,11 @@ def main():
     )
 
     print("\n✓ AES-256 session key generated")
-    print("✓ AES-256-GCM encrypted message")
-    print("✓ RSA-2048-OAEP protected AES key")
+    print("✓ Message encrypted using AES-256-GCM")
+    print("✓ AES key protected using RSA-2048-OAEP")
 
     # ========================================================
-    # 5. RECEIVER
+    # 7. RECEIVER
     # ========================================================
 
     print("\n[5] RECEIVER")
@@ -165,10 +177,10 @@ def main():
     )
 
     print("✓ AES key recovered using RSA")
-    print("✓ Message decrypted using AES-GCM")
+    print("✓ Message decrypted and authenticated using AES-GCM")
 
     # ========================================================
-    # 6. VERIFICATION
+    # 8. VERIFICATION
     # ========================================================
 
     print("\n[6] VERIFICATION")
